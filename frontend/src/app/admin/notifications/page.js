@@ -381,6 +381,6 @@ export default function AdminNotificationsPage() {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 }
