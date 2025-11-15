@@ -850,6 +850,253 @@ class CreditSystemTester:
         
         return True
 
+    # ==================== Job Seeker Settings Tests ====================
+    
+    def test_jobseeker_settings_api(self):
+        """Test GET/PUT /api/profiles/jobseeker/settings - Job seeker settings"""
+        log_info("Testing Job Seeker Settings API...")
+        
+        headers = {"Authorization": f"Bearer {self.job_seeker_token}"}
+        
+        # Test GET settings
+        response = requests.get(f"{API_BASE}/profiles/jobseeker/settings", headers=headers)
+        
+        if response.status_code == 200:
+            settings = response.json()
+            log_success("Job seeker settings retrieved successfully")
+            log_info(f"Expected salary: {settings.get('expected_salary', 'N/A')}")
+            log_info(f"Current salary: {settings.get('current_salary', 'N/A')}")
+            log_info(f"Notice period: {settings.get('notice_period', 'N/A')}")
+            log_info(f"Preferred locations: {settings.get('preferred_locations', [])}")
+            log_info(f"Job search status: {settings.get('job_search_status', 'N/A')}")
+        else:
+            log_error(f"Job seeker settings retrieval failed: {response.text}")
+            return False
+        
+        # Test PUT settings (update)
+        update_data = {
+            "expected_salary": 120000,
+            "current_salary": 95000,
+            "notice_period": "2 months",
+            "preferred_locations": ["San Francisco, CA", "New York, NY", "Seattle, WA"],
+            "preferred_positions": ["Senior Software Engineer", "Tech Lead", "Principal Engineer"],
+            "job_search_status": "actively_looking",
+            "willing_to_relocate": True
+        }
+        
+        response = requests.put(f"{API_BASE}/profiles/jobseeker/settings", json=update_data, headers=headers)
+        
+        if response.status_code == 200:
+            log_success("Job seeker settings updated successfully")
+        else:
+            log_error(f"Job seeker settings update failed: {response.text}")
+            return False
+        
+        # Verify the update by getting settings again
+        response = requests.get(f"{API_BASE}/profiles/jobseeker/settings", headers=headers)
+        
+        if response.status_code == 200:
+            updated_settings = response.json()
+            if updated_settings.get('expected_salary') == 120000:
+                log_success("Settings update verified - expected salary correct")
+            else:
+                log_error("Settings update verification failed")
+                return False
+        else:
+            log_error(f"Settings verification failed: {response.text}")
+            return False
+        
+        # Test unauthorized access (employer trying to access job seeker settings)
+        headers = {"Authorization": f"Bearer {self.employer_token}"}
+        response = requests.get(f"{API_BASE}/profiles/jobseeker/settings", headers=headers)
+        
+        if response.status_code == 403:
+            log_success("Employer correctly blocked from accessing job seeker settings")
+        else:
+            log_error("Employer was able to access job seeker settings (authorization issue)")
+            return False
+        
+        return True
+    
+    def test_jobseeker_search_api(self):
+        """Test GET /api/profiles/jobseeker/search - Job seeker search (employer only)"""
+        log_info("Testing Job Seeker Search API...")
+        
+        headers = {"Authorization": f"Bearer {self.employer_token}"}
+        
+        # Test basic search (no filters)
+        response = requests.get(f"{API_BASE}/profiles/jobseeker/search", headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_success(f"Basic job seeker search successful - {result['total']} profiles found")
+            log_info(f"Page: {result['page']}, Limit: {result['limit']}, Pages: {result['pages']}")
+            
+            if result['profiles']:
+                profile = result['profiles'][0]
+                log_info(f"Sample profile: {profile.get('first_name', 'N/A')} {profile.get('last_name', 'N/A')}")
+                log_info(f"Email included: {'email' in profile}")
+                log_info(f"Location: {profile.get('location', 'N/A')}")
+        else:
+            log_error(f"Basic job seeker search failed: {response.text}")
+            return False
+        
+        # Test search with query parameter
+        params = {
+            "query": "Alex",
+            "page": 1,
+            "limit": 10
+        }
+        
+        response = requests.get(f"{API_BASE}/profiles/jobseeker/search", params=params, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_success(f"Query search successful - {result['total']} profiles found")
+        else:
+            log_error(f"Query search failed: {response.text}")
+            return False
+        
+        # Test search with location filter
+        params = {
+            "location": "San Francisco",
+            "page": 1,
+            "limit": 10
+        }
+        
+        response = requests.get(f"{API_BASE}/profiles/jobseeker/search", params=params, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_success(f"Location search successful - {result['total']} profiles found")
+        else:
+            log_error(f"Location search failed: {response.text}")
+            return False
+        
+        # Test search with experience range
+        params = {
+            "experience_min": 5,
+            "experience_max": 15,
+            "page": 1,
+            "limit": 10
+        }
+        
+        response = requests.get(f"{API_BASE}/profiles/jobseeker/search", params=params, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_success(f"Experience range search successful - {result['total']} profiles found")
+        else:
+            log_error(f"Experience range search failed: {response.text}")
+            return False
+        
+        # Test search with skills filter
+        params = {
+            "skills": "Python,JavaScript",
+            "page": 1,
+            "limit": 10
+        }
+        
+        response = requests.get(f"{API_BASE}/profiles/jobseeker/search", params=params, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_success(f"Skills search successful - {result['total']} profiles found")
+        else:
+            log_error(f"Skills search failed: {response.text}")
+            return False
+        
+        # Test search with verified_only filter
+        params = {
+            "verified_only": True,
+            "page": 1,
+            "limit": 10
+        }
+        
+        response = requests.get(f"{API_BASE}/profiles/jobseeker/search", params=params, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_success(f"Verified only search successful - {result['total']} profiles found")
+        else:
+            log_error(f"Verified only search failed: {response.text}")
+            return False
+        
+        # Test different sort options
+        for sort_by in ['relevance', 'experience', 'recent']:
+            params = {
+                "sort_by": sort_by,
+                "page": 1,
+                "limit": 5
+            }
+            
+            response = requests.get(f"{API_BASE}/profiles/jobseeker/search", params=params, headers=headers)
+            
+            if response.status_code == 200:
+                result = response.json()
+                log_success(f"Sort by {sort_by} successful - {result['total']} profiles found")
+            else:
+                log_error(f"Sort by {sort_by} failed: {response.text}")
+                return False
+        
+        # Test pagination
+        params = {
+            "page": 2,
+            "limit": 5
+        }
+        
+        response = requests.get(f"{API_BASE}/profiles/jobseeker/search", params=params, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_success(f"Pagination test successful - page {result['page']}")
+        else:
+            log_error(f"Pagination test failed: {response.text}")
+            return False
+        
+        # Test comprehensive filter combination
+        params = {
+            "query": "Engineer",
+            "location": "San Francisco",
+            "experience_min": 3,
+            "experience_max": 10,
+            "skills": "Python",
+            "sort_by": "experience",
+            "page": 1,
+            "limit": 10
+        }
+        
+        response = requests.get(f"{API_BASE}/profiles/jobseeker/search", params=params, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_success(f"Comprehensive filter search successful - {result['total']} profiles found")
+        else:
+            log_error(f"Comprehensive filter search failed: {response.text}")
+            return False
+        
+        # Test unauthorized access (job seeker trying to search)
+        headers = {"Authorization": f"Bearer {self.job_seeker_token}"}
+        response = requests.get(f"{API_BASE}/profiles/jobseeker/search", headers=headers)
+        
+        if response.status_code == 403:
+            log_success("Job seeker correctly blocked from searching talent")
+        else:
+            log_error("Job seeker was able to search talent (authorization issue)")
+            return False
+        
+        # Test unauthorized access (interviewer trying to search)
+        headers = {"Authorization": f"Bearer {self.interviewer_token}"}
+        response = requests.get(f"{API_BASE}/profiles/jobseeker/search", headers=headers)
+        
+        if response.status_code == 403:
+            log_success("Interviewer correctly blocked from searching talent")
+        else:
+            log_error("Interviewer was able to search talent (authorization issue)")
+            return False
+        
+        return True
+    
     # Old job system tests removed - focusing on Iteration 4 credit system tests
     
     def run_all_tests(self):
