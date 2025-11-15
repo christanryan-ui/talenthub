@@ -1521,9 +1521,9 @@ class CreditSystemTester:
     
     def run_all_tests(self):
         """Run all backend API tests for Iteration 4 Credit System"""
-        print(f"{Colors.BOLD}🚀 Starting TalentHub Iteration 4 Backend API Tests{Colors.ENDC}")
+        print(f"{Colors.BOLD}🚀 Starting TalentHub ATS Ranking System Backend API Tests{Colors.ENDC}")
         print(f"Backend URL: {BACKEND_URL}")
-        print("Testing: Credit System, Contact Reveal, Interview Verification")
+        print("Testing: ATS Ranking System - Single & Multiple Candidate Ranking")
         print("=" * 70)
         
         tests = [
