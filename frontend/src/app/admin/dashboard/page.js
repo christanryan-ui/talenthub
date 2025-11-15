@@ -89,14 +89,21 @@ export default function AdminDashboard() {
         }
         setUser(response.data);
         
-        // TODO: Fetch real stats from backend
+        // Fetch real stats from backend
+        const [usersRes, jobsRes, creditsRes, interviewsRes] = await Promise.all([
+          api.get('/admin/users?page=1&limit=1'),
+          api.get('/jobs/jobs?page=1&limit=1'),
+          api.get('/credits/admin/transactions?page=1&limit=1'),
+          api.get('/interviews/admin/requests')
+        ]);
+        
         setStats({
-          totalUsers: 1250,
-          totalJobs: 450,
-          totalCredits: 125000,
-          activeInterviews: 34,
-          newUsersThisWeek: 87,
-          pendingVerifications: 12
+          totalUsers: usersRes.data.total || 0,
+          totalJobs: jobsRes.data.total || 0,
+          totalCredits: creditsRes.data.total || 0,
+          activeInterviews: interviewsRes.data.requests?.filter(r => r.status === 'ASSIGNED').length || 0,
+          newUsersThisWeek: usersRes.data.total || 0, // Can be enhanced with date filter
+          pendingVerifications: interviewsRes.data.requests?.filter(r => r.status === 'PENDING').length || 0
         });
       } catch (err) {
         router.push('/auth/login');
