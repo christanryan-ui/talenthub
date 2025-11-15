@@ -1106,7 +1106,7 @@ export default function JobSeekerProfilePage() {
                 Save Theme
               </button>
             </div>
-          </aside>
+          </div>
         )}
       </div>
     </JobSeekerLayout>
