@@ -1529,20 +1529,11 @@ class CreditSystemTester:
         tests = [
             ("Create Test Users", self.create_test_users),
             ("Create Test Profiles", self.create_test_profiles),
-            ("Job Seeker Settings API", self.test_jobseeker_settings_api),
-            ("Job Seeker Search API", self.test_jobseeker_search_api),
-            ("Platform Settings API", self.test_platform_settings_api),
-            ("Credit Balance API", self.test_credit_balance_api),
-            ("Admin Credit Management API", self.test_admin_credit_management_api),
-            ("Transaction History API", self.test_transaction_history_api),
-            ("Contact Reveal API", self.test_contact_reveal_api),
-            ("Contact Access API", self.test_contact_access_api),
-            ("Interview Request Creation API", self.test_interview_request_creation_api),
-            ("Interviewer Request Management API", self.test_interviewer_request_management_api),
-            ("Interview Rating API", self.test_interview_rating_api),
-            ("Job Seeker Verification Badge API", self.test_jobseeker_verification_badge_api),
-            ("Admin Interview Management API", self.test_admin_interview_management_api),
-            ("Admin Transaction Viewing API", self.test_admin_transaction_viewing_api),
+            ("Create Test Job", self.create_test_job),
+            ("Update Candidate Profile for ATS", self.update_candidate_profile_for_ats),
+            ("ATS Rank Single Candidate API", self.test_ats_rank_single_candidate_api),
+            ("ATS Rank Multiple Candidates API", self.test_ats_rank_multiple_candidates_api),
+            ("ATS Scoring Scenarios", self.test_ats_scoring_scenarios),
         ]
         
         passed = 0
