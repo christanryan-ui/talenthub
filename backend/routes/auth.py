@@ -39,7 +39,7 @@ async def get_current_user(authorization: Optional[str] = Header(None)) -> Optio
 @router.post('/register')
 async def register(user_data: UserCreate):
     """
-    Register a new user
+    Register a new user with email and password
     """
     # Check if email already exists
     existing_user = await db.users.find_one({'email': user_data.email})
@@ -51,6 +51,10 @@ async def register(user_data: UserCreate):
         existing_phone = await db.users.find_one({'phone': user_data.phone})
         if existing_phone:
             raise HTTPException(status_code=400, detail='Phone number already registered')
+    
+    # Validate password length
+    if len(user_data.password) < 6:
+        raise HTTPException(status_code=400, detail='Password must be at least 6 characters')
     
     # Get bonus config for the role
     bonus_config = await db.bonus_configs.find_one({'role': user_data.role})
@@ -71,10 +75,14 @@ async def register(user_data: UserCreate):
     else:
         signup_bonus = bonus_config.get('signup_bonus', 0)
     
+    # Hash password
+    password_hash = hash_password(user_data.password)
+    
     # Create user
     user = User(
         email=user_data.email,
         phone=user_data.phone,
+        password_hash=password_hash,
         role=user_data.role,
         credits_free=signup_bonus,
         credits_paid=0
@@ -101,6 +109,51 @@ async def register(user_data: UserCreate):
             'email': user.email,
             'role': user.role,
             'credits_free': user.credits_free
+        }
+    }
+
+@router.post('/login')
+async def login(login_data: UserLogin):
+    """
+    Login with email and password
+    """
+    # Find user by email
+    user_data = await db.users.find_one({'email': login_data.email})
+    
+    if not user_data:
+        raise HTTPException(status_code=401, detail='Invalid email or password')
+    
+    user = User(**user_data)
+    
+    # Verify password
+    if not verify_password(login_data.password, user.password_hash):
+        raise HTTPException(status_code=401, detail='Invalid email or password')
+    
+    # Check if user is active
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail='Account is inactive')
+    
+    # Update last login
+    await db.users.update_one(
+        {'id': user.id},
+        {'$set': {'last_login': datetime.utcnow()}}
+    )
+    
+    # Generate JWT access token
+    access_token = create_access_token(
+        data={'user_id': user.id, 'email': user.email, 'role': user.role}
+    )
+    
+    return {
+        'access_token': access_token,
+        'token_type': 'bearer',
+        'user': {
+            'id': user.id,
+            'email': user.email,
+            'role': user.role,
+            'credits_free': user.credits_free,
+            'credits_paid': user.credits_paid,
+            'is_verified': user.is_verified
         }
     }
 
