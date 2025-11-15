@@ -1,18 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { Briefcase, Mail, Phone, Loader2, CheckCircle2, AlertCircle, User } from 'lucide-react';
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     email: '',
     phone: '',
-    role: searchParams.get('role') || 'jobseeker',
+    role: searchParams?.get('role') || 'jobseeker',
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
