@@ -18,6 +18,7 @@ class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: EmailStr
     phone: Optional[str] = None
+    password_hash: str
     role: UserRole
     is_verified: bool = False
     is_active: bool = True
@@ -31,8 +32,13 @@ class User(BaseModel):
 
 class UserCreate(BaseModel):
     email: EmailStr
+    password: str
     phone: Optional[str] = None
     role: UserRole
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
 
 class MagicLinkRequest(BaseModel):
     email: EmailStr
