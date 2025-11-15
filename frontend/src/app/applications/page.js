@@ -248,6 +248,6 @@ export default function MyApplicationsPage() {
           </div>
         )}
       </div>
-    </div>
+    </JobSeekerLayout>
   );
 }
