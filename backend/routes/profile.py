@@ -23,7 +23,7 @@ db = None
 
 @router.post('/jobseeker/profile')
 async def create_jobseeker_profile(
-    profile_data: JobSeekerProfileCreate,
+    profile_data: dict,
     current_user: User = Depends(get_current_user)
 ):
     """Create job seeker profile"""
@@ -36,14 +36,23 @@ async def create_jobseeker_profile(
         raise HTTPException(status_code=400, detail='Profile already exists')
     
     # Create profile
-    profile = JobSeekerProfile(
-        user_id=current_user.id,
-        **profile_data.model_dump()
-    )
+    import uuid
+    profile_dict = {
+        'id': str(uuid.uuid4()),
+        'user_id': current_user.id,
+        'created_at': datetime.utcnow(),
+        'updated_at': datetime.utcnow(),
+        'is_profile_complete': False,
+        'overall_rating': None,
+        'verification_count': 0,
+        'resume_url': None,
+        'resume_original_url': None,
+        **profile_data
+    }
     
-    await db.jobseeker_profiles.insert_one(profile.model_dump())
+    await db.jobseeker_profiles.insert_one(profile_dict)
     
-    return {'message': 'Profile created successfully', 'profile': profile}
+    return {'message': 'Profile created successfully', 'profile': profile_dict}
 
 @router.get('/jobseeker/profile')
 async def get_jobseeker_profile(current_user: User = Depends(get_current_user)):
