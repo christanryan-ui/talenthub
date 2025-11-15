@@ -44,11 +44,11 @@ export default function SettingsPage() {
     setSaving(true);
     setMessage({ type: '', text: '' });
     try {
-      await api.put('/profiles/settings', settings);
+      await api.put('/profiles/jobseeker/settings', settings);
       setMessage({ type: 'success', text: 'Settings saved successfully!' });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (err) {
-      setMessage({ type: 'error', text: 'Failed to save settings' });
+      setMessage({ type: 'error', text: err.response?.data?.detail || 'Failed to save settings' });
     } finally {
       setSaving(false);
     }
