@@ -327,24 +327,17 @@ export default function JobSeekerProfilePage() {
       <div className="p-8">
         {/* Theme Customizer Button */}
         <div className="mb-6 flex justify-end">
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={() => setShowThemeCustomizer(!showThemeCustomizer)}
-              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              <Palette className="h-5 w-5" />
-              <span>Customize Theme</span>
-            </button>
-            <Link href="/dashboard" className="text-gray-600 hover:text-blue-600 transition-colors">
-              Back to Dashboard
-            </Link>
-          </div>
+          <button
+            onClick={() => setShowThemeCustomizer(!showThemeCustomizer)}
+            className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 shadow-sm"
+          >
+            <Palette className="h-5 w-5 text-blue-600" />
+            <span className="font-medium">Customize Theme</span>
+          </button>
         </div>
-      </header>
 
-      <div className="flex">
         {/* Main Content */}
-        <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
+        <div className="max-w-5xl mx-auto">
           <div className="bg-white rounded-xl shadow-sm border p-8">
             {/* Profile Header with Image */}
             <div className="flex items-start justify-between mb-6">
