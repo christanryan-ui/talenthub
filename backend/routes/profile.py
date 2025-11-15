@@ -60,7 +60,7 @@ async def get_jobseeker_profile(current_user: User = Depends(get_current_user)):
 
 @router.put('/jobseeker/profile')
 async def update_jobseeker_profile(
-    profile_data: JobSeekerProfileUpdate,
+    profile_data: dict,
     current_user: User = Depends(get_current_user)
 ):
     """Update job seeker profile"""
@@ -71,8 +71,8 @@ async def update_jobseeker_profile(
     if not existing_profile:
         raise HTTPException(status_code=404, detail='Profile not found')
     
-    # Update only provided fields
-    update_data = {k: v for k, v in profile_data.model_dump().items() if v is not None}
+    # Update with all fields from profile_data
+    update_data = {k: v for k, v in profile_data.items() if v is not None and k != 'user_id' and k != 'id'}
     update_data['updated_at'] = datetime.utcnow()
     
     await db.jobseeker_profiles.update_one(
