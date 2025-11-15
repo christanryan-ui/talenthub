@@ -1097,7 +1097,426 @@ class CreditSystemTester:
         
         return True
     
-    # Old job system tests removed - focusing on Iteration 4 credit system tests
+    # ==================== ATS Ranking System Tests ====================
+    
+    def create_test_job(self):
+        """Create a test job for ATS ranking"""
+        log_info("Creating test job for ATS ranking...")
+        
+        headers = {"Authorization": f"Bearer {self.employer_token}"}
+        
+        job_data = {
+            "title": "Senior Full Stack Developer",
+            "description": "We are looking for an experienced full stack developer to join our team.",
+            "required_skills": ["Python", "React", "MongoDB"],
+            "min_experience": 3,
+            "max_experience": 8,
+            "location": "Remote",
+            "education_required": "Bachelor",
+            "job_type": "full_time",
+            "work_mode": "remote",
+            "salary_min": 80000,
+            "salary_max": 120000,
+            "company_name": "TechCorp Solutions"
+        }
+        
+        response = requests.post(f"{API_BASE}/jobs/jobs", json=job_data, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            self.test_job_id = result['job']['id']
+            log_success(f"Test job created with ID: {self.test_job_id}")
+            return True
+        else:
+            log_error(f"Test job creation failed: {response.text}")
+            return False
+    
+    def update_candidate_profile_for_ats(self):
+        """Update job seeker profile with ATS-relevant data"""
+        log_info("Updating job seeker profile for ATS testing...")
+        
+        headers = {"Authorization": f"Bearer {self.job_seeker_token}"}
+        
+        # Update profile with skills and experience data
+        profile_update = {
+            "primary_skills": ["Python", "JavaScript", "React", "Node.js", "AWS"],
+            "experience_years": 5,
+            "current_position": "Software Engineer",
+            "current_company": "Google Inc",
+            "location": "San Francisco, CA",
+            "education": [
+                {
+                    "degree": "Bachelor of Science in Computer Science",
+                    "institution": "Stanford University",
+                    "graduation_year": 2019
+                }
+            ],
+            "preferred_locations": ["Remote", "San Francisco, CA"],
+            "willing_to_relocate": True
+        }
+        
+        response = requests.put(f"{API_BASE}/profiles/jobseeker/profile", json=profile_update, headers=headers)
+        
+        if response.status_code == 200:
+            log_success("Job seeker profile updated for ATS testing")
+            return True
+        else:
+            log_error(f"Profile update failed: {response.text}")
+            return False
+    
+    def test_ats_rank_single_candidate_api(self):
+        """Test POST /api/profiles/ats/rank-candidate - Single candidate ranking"""
+        log_info("Testing ATS Rank Single Candidate API...")
+        
+        if not hasattr(self, 'test_job_id'):
+            log_error("No test job available for ATS ranking")
+            return False
+        
+        # Test 1: Job seeker ranking themselves (auto-uses current user)
+        headers = {"Authorization": f"Bearer {self.job_seeker_token}"}
+        ranking_data = {
+            "job_id": self.test_job_id
+        }
+        
+        response = requests.post(f"{API_BASE}/profiles/ats/rank-candidate", json=ranking_data, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_success("Job seeker self-ranking successful")
+            log_info(f"Overall Score: {result['overall_score']}")
+            log_info(f"Ranking: {result['ranking']}")
+            log_info(f"Category: {result['category']}")
+            log_info(f"Skills Score: {result['breakdown']['skills']['score']}")
+            log_info(f"Experience Score: {result['breakdown']['experience']['score']}")
+            log_info(f"Location Score: {result['breakdown']['location']['score']}")
+            log_info(f"Education Score: {result['breakdown']['education']['score']}")
+            
+            # Validate response structure
+            required_fields = ['overall_score', 'ranking', 'category', 'breakdown']
+            for field in required_fields:
+                if field not in result:
+                    log_error(f"Missing required field: {field}")
+                    return False
+            
+            # Validate breakdown structure
+            breakdown_fields = ['skills', 'experience', 'location', 'education']
+            for field in breakdown_fields:
+                if field not in result['breakdown']:
+                    log_error(f"Missing breakdown field: {field}")
+                    return False
+                
+                score_fields = ['score', 'weight', 'weighted_score']
+                for score_field in score_fields:
+                    if score_field not in result['breakdown'][field]:
+                        log_error(f"Missing score field: {field}.{score_field}")
+                        return False
+        else:
+            log_error(f"Job seeker self-ranking failed: {response.text}")
+            return False
+        
+        # Test 2: Employer ranking specific candidate
+        headers = {"Authorization": f"Bearer {self.employer_token}"}
+        ranking_data = {
+            "job_id": self.test_job_id,
+            "candidate_id": self.job_seeker_user_id
+        }
+        
+        response = requests.post(f"{API_BASE}/profiles/ats/rank-candidate", json=ranking_data, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_success("Employer candidate ranking successful")
+            log_info(f"Candidate: {result.get('candidate_name', 'N/A')}")
+            log_info(f"Overall Score: {result['overall_score']}")
+            log_info(f"Ranking: {result['ranking']}")
+        else:
+            log_error(f"Employer candidate ranking failed: {response.text}")
+            return False
+        
+        # Test 3: Missing job_id (should fail)
+        ranking_data = {
+            "candidate_id": self.job_seeker_user_id
+        }
+        
+        response = requests.post(f"{API_BASE}/profiles/ats/rank-candidate", json=ranking_data, headers=headers)
+        
+        if response.status_code == 400:
+            log_success("Missing job_id correctly rejected")
+        else:
+            log_error("Missing job_id was not properly handled")
+            return False
+        
+        # Test 4: Non-existent job (should fail)
+        ranking_data = {
+            "job_id": "non-existent-job-id",
+            "candidate_id": self.job_seeker_user_id
+        }
+        
+        response = requests.post(f"{API_BASE}/profiles/ats/rank-candidate", json=ranking_data, headers=headers)
+        
+        if response.status_code == 404:
+            log_success("Non-existent job correctly rejected")
+        else:
+            log_error("Non-existent job was not properly handled")
+            return False
+        
+        # Test 5: Non-existent candidate (should fail)
+        ranking_data = {
+            "job_id": self.test_job_id,
+            "candidate_id": "non-existent-candidate-id"
+        }
+        
+        response = requests.post(f"{API_BASE}/profiles/ats/rank-candidate", json=ranking_data, headers=headers)
+        
+        if response.status_code == 404:
+            log_success("Non-existent candidate correctly rejected")
+        else:
+            log_error("Non-existent candidate was not properly handled")
+            return False
+        
+        return True
+    
+    def test_ats_rank_multiple_candidates_api(self):
+        """Test POST /api/profiles/ats/rank-multiple - Multiple candidate ranking"""
+        log_info("Testing ATS Rank Multiple Candidates API...")
+        
+        if not hasattr(self, 'test_job_id'):
+            log_error("No test job available for ATS ranking")
+            return False
+        
+        # First, create a job application so we have candidates to rank
+        headers = {"Authorization": f"Bearer {self.job_seeker_token}"}
+        application_data = {
+            "job_id": self.test_job_id,
+            "cover_letter": "I am very interested in this position and believe my skills align well with your requirements."
+        }
+        
+        response = requests.post(f"{API_BASE}/jobs/applications", json=application_data, headers=headers)
+        if response.status_code != 200:
+            log_warning("Could not create job application for testing")
+        
+        # Test 1: Employer ranking all applicants (no candidate_ids provided)
+        headers = {"Authorization": f"Bearer {self.employer_token}"}
+        ranking_data = {
+            "job_id": self.test_job_id
+        }
+        
+        response = requests.post(f"{API_BASE}/profiles/ats/rank-multiple", json=ranking_data, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_success("Multiple candidate ranking successful")
+            log_info(f"Job: {result.get('job_title', 'N/A')}")
+            log_info(f"Total candidates: {result['total_candidates']}")
+            
+            if result['candidates']:
+                # Check if candidates are sorted by score (highest first)
+                candidates = result['candidates']
+                for i in range(len(candidates) - 1):
+                    if candidates[i]['overall_score'] < candidates[i + 1]['overall_score']:
+                        log_error("Candidates are not sorted by score correctly")
+                        return False
+                
+                log_success("Candidates correctly sorted by overall score")
+                
+                # Log top candidate details
+                top_candidate = candidates[0]
+                log_info(f"Top candidate: {top_candidate.get('candidate_name', 'N/A')}")
+                log_info(f"Top score: {top_candidate['overall_score']}")
+                log_info(f"Top ranking: {top_candidate['ranking']}")
+            else:
+                log_info("No candidates found to rank")
+        else:
+            log_error(f"Multiple candidate ranking failed: {response.text}")
+            return False
+        
+        # Test 2: Employer ranking specific candidates
+        ranking_data = {
+            "job_id": self.test_job_id,
+            "candidate_ids": [self.job_seeker_user_id]
+        }
+        
+        response = requests.post(f"{API_BASE}/profiles/ats/rank-multiple", json=ranking_data, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_success("Specific candidates ranking successful")
+            log_info(f"Candidates ranked: {len(result['candidates'])}")
+        else:
+            log_error(f"Specific candidates ranking failed: {response.text}")
+            return False
+        
+        # Test 3: Non-employer trying to use feature (should fail)
+        headers = {"Authorization": f"Bearer {self.job_seeker_token}"}
+        ranking_data = {
+            "job_id": self.test_job_id
+        }
+        
+        response = requests.post(f"{API_BASE}/profiles/ats/rank-multiple", json=ranking_data, headers=headers)
+        
+        if response.status_code == 403:
+            log_success("Non-employer correctly blocked from multiple ranking")
+        else:
+            log_error("Non-employer was able to use multiple ranking feature")
+            return False
+        
+        # Test 4: Employer trying to rank candidates for job they don't own
+        # Create another employer and job
+        other_employer_data = {
+            "email": f"employer2_{uuid.uuid4().hex[:8]}@test.com",
+            "password": "EmployerPassword123!",
+            "role": "employer"
+        }
+        
+        response = requests.post(f"{API_BASE}/auth/register", json=other_employer_data)
+        if response.status_code == 200:
+            login_response = requests.post(f"{API_BASE}/auth/login", json={
+                "email": other_employer_data["email"],
+                "password": other_employer_data["password"]
+            })
+            if login_response.status_code == 200:
+                other_employer_token = login_response.json()["access_token"]
+                
+                # Try to rank candidates for job they don't own
+                headers = {"Authorization": f"Bearer {other_employer_token}"}
+                ranking_data = {
+                    "job_id": self.test_job_id
+                }
+                
+                response = requests.post(f"{API_BASE}/profiles/ats/rank-multiple", json=ranking_data, headers=headers)
+                
+                if response.status_code == 403:
+                    log_success("Employer correctly blocked from ranking candidates for other's job")
+                else:
+                    log_error("Employer was able to rank candidates for job they don't own")
+                    return False
+        
+        # Test 5: Missing job_id (should fail)
+        headers = {"Authorization": f"Bearer {self.employer_token}"}
+        ranking_data = {}
+        
+        response = requests.post(f"{API_BASE}/profiles/ats/rank-multiple", json=ranking_data, headers=headers)
+        
+        if response.status_code == 400:
+            log_success("Missing job_id correctly rejected in multiple ranking")
+        else:
+            log_error("Missing job_id was not properly handled in multiple ranking")
+            return False
+        
+        return True
+    
+    def test_ats_scoring_scenarios(self):
+        """Test different ATS scoring scenarios (high, medium, low match)"""
+        log_info("Testing ATS Scoring Scenarios...")
+        
+        if not hasattr(self, 'test_job_id'):
+            log_error("No test job available for ATS scoring scenarios")
+            return False
+        
+        # Create different candidate profiles for testing
+        test_scenarios = [
+            {
+                "name": "High Match Candidate",
+                "profile": {
+                    "primary_skills": ["Python", "React", "MongoDB", "JavaScript", "AWS"],
+                    "experience_years": 5,  # Matches job requirement (3-8 years)
+                    "location": "Remote",  # Exact match
+                    "education": [{"degree": "Bachelor of Science in Computer Science"}],
+                    "preferred_locations": ["Remote"],
+                    "willing_to_relocate": True
+                },
+                "expected_score_range": (80, 100)
+            },
+            {
+                "name": "Medium Match Candidate", 
+                "profile": {
+                    "primary_skills": ["Python", "JavaScript"],  # Partial skill match
+                    "experience_years": 4,  # Good experience match
+                    "location": "New York, NY",  # Different location
+                    "education": [{"degree": "Bachelor of Arts"}],  # Different degree
+                    "preferred_locations": ["New York, NY"],
+                    "willing_to_relocate": False
+                },
+                "expected_score_range": (50, 79)
+            },
+            {
+                "name": "Low Match Candidate",
+                "profile": {
+                    "primary_skills": ["Java", "C++"],  # No skill match
+                    "experience_years": 1,  # Below minimum experience
+                    "location": "Tokyo, Japan",  # Very different location
+                    "education": [{"degree": "High School Diploma"}],  # Lower education
+                    "preferred_locations": ["Tokyo, Japan"],
+                    "willing_to_relocate": False
+                },
+                "expected_score_range": (0, 49)
+            }
+        ]
+        
+        headers = {"Authorization": f"Bearer {self.employer_token}"}
+        
+        for scenario in test_scenarios:
+            log_info(f"Testing scenario: {scenario['name']}")
+            
+            # Create a temporary candidate profile for testing
+            temp_candidate_data = {
+                "email": f"candidate_{uuid.uuid4().hex[:8]}@test.com",
+                "password": "CandidatePassword123!",
+                "role": "jobseeker"
+            }
+            
+            response = requests.post(f"{API_BASE}/auth/register", json=temp_candidate_data)
+            if response.status_code == 200:
+                login_response = requests.post(f"{API_BASE}/auth/login", json={
+                    "email": temp_candidate_data["email"],
+                    "password": temp_candidate_data["password"]
+                })
+                if login_response.status_code == 200:
+                    temp_token = login_response.json()["access_token"]
+                    temp_user_id = login_response.json()["user"]["id"]
+                    
+                    # Create profile with scenario data
+                    temp_headers = {"Authorization": f"Bearer {temp_token}"}
+                    profile_data = {
+                        "first_name": "Test",
+                        "last_name": "Candidate",
+                        "phone": "+1-555-0000",
+                        **scenario["profile"]
+                    }
+                    
+                    profile_response = requests.post(f"{API_BASE}/profiles/jobseeker/profile", 
+                                                   json=profile_data, headers=temp_headers)
+                    
+                    if profile_response.status_code == 200:
+                        # Test ranking for this candidate
+                        ranking_data = {
+                            "job_id": self.test_job_id,
+                            "candidate_id": temp_user_id
+                        }
+                        
+                        ranking_response = requests.post(f"{API_BASE}/profiles/ats/rank-candidate", 
+                                                       json=ranking_data, headers=headers)
+                        
+                        if ranking_response.status_code == 200:
+                            result = ranking_response.json()
+                            score = result['overall_score']
+                            min_score, max_score = scenario['expected_score_range']
+                            
+                            if min_score <= score <= max_score:
+                                log_success(f"{scenario['name']}: Score {score} within expected range ({min_score}-{max_score})")
+                                log_info(f"  Ranking: {result['ranking']}")
+                                log_info(f"  Category: {result['category']}")
+                            else:
+                                log_error(f"{scenario['name']}: Score {score} outside expected range ({min_score}-{max_score})")
+                                return False
+                        else:
+                            log_error(f"Ranking failed for {scenario['name']}: {ranking_response.text}")
+                            return False
+                    else:
+                        log_error(f"Profile creation failed for {scenario['name']}")
+                        return False
+        
+        return True
     
     def run_all_tests(self):
         """Run all backend API tests for Iteration 4 Credit System"""
