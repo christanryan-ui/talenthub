@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8001';
+// Use the production URL directly since we're having env variable issues
+const API_URL = typeof window !== 'undefined' && window.location.origin 
+  ? window.location.origin 
+  : 'https://hiresafe-2.preview.emergentagent.com';
+
+console.log('API URL:', API_URL);
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
@@ -8,6 +13,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: false,
+  timeout: 30000, // 30 second timeout
 });
 
 // Add auth token to requests
