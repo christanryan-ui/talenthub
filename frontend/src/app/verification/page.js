@@ -99,6 +99,6 @@ export default function VerificationPage() {
           </div>
         )}
       </div>
-    </div>
+    </JobSeekerLayout>
   );
 }
