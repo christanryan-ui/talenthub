@@ -9,6 +9,10 @@ export default function NotificationBanner({ userRole = null, userId = null }) {
   const [dismissed, setDismissed] = useState([]);
 
   useEffect(() => {
+    // Load dismissed from localStorage
+    const stored = JSON.parse(localStorage.getItem('dismissedNotifications') || '[]');
+    setDismissed(stored);
+    
     const fetchNotifications = async () => {
       try {
         let response;
