@@ -1109,6 +1109,8 @@ class CreditSystemTester:
         tests = [
             ("Create Test Users", self.create_test_users),
             ("Create Test Profiles", self.create_test_profiles),
+            ("Job Seeker Settings API", self.test_jobseeker_settings_api),
+            ("Job Seeker Search API", self.test_jobseeker_search_api),
             ("Platform Settings API", self.test_platform_settings_api),
             ("Credit Balance API", self.test_credit_balance_api),
             ("Admin Credit Management API", self.test_admin_credit_management_api),
