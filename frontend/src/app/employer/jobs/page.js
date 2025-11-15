@@ -16,7 +16,8 @@ import {
   CheckCircle,
   X,
   DollarSign,
-  Clock
+  Clock,
+  Award
 } from 'lucide-react';
 
 export default function EmployerJobsPage() {
