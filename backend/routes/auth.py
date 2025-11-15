@@ -157,10 +157,10 @@ async def login(login_data: UserLogin):
         }
     }
 
-@router.post('/magic-link')
-async def request_magic_link(magic_link_request: MagicLinkRequest):
+@router.post('/forgot-password')
+async def forgot_password(magic_link_request: MagicLinkRequest):
     """
-    Request a magic link for authentication
+    Request a password reset magic link
     """
     # Find user by email
     user_data = await db.users.find_one({'email': magic_link_request.email})
