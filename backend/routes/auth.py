@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, Depends, Header
-from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Optional
 import os
 from datetime import datetime
@@ -11,10 +10,8 @@ from utils.acl import check_permission
 
 router = APIRouter()
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# Database will be injected from main server
+db = None
 
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 
