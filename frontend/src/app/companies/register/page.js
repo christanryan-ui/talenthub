@@ -4,15 +4,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { Briefcase, Mail, Phone, Loader2, CheckCircle2, AlertCircle, Lock, Eye, EyeOff } from 'lucide-react';
+import { Building, Mail, Phone, Loader2, CheckCircle2, AlertCircle, Lock, Eye, EyeOff } from 'lucide-react';
 
-export default function JobSeekerRegisterPage() {
+export default function CompanyRegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     phone: '',
-    role: 'jobseeker',
+    role: 'employer',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,12 +38,12 @@ export default function JobSeekerRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center space-x-2 text-blue-600">
-            <Briefcase className="h-10 w-10" />
+          <Link href="/companies" className="inline-flex items-center space-x-2 text-purple-600">
+            <Building className="h-10 w-10" />
             <span className="text-3xl font-bold">TalentHub</span>
           </Link>
         </div>
@@ -52,14 +52,14 @@ export default function JobSeekerRegisterPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {!success ? (
             <>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">Find Your Dream Job</h1>
-              <p className="text-gray-600 text-center mb-8">Create your job seeker account</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">Hire Top Talent</h1>
+              <p className="text-gray-600 text-center mb-8">Create your company account</p>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Email */}
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
+                    Company Email *
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -71,8 +71,8 @@ export default function JobSeekerRegisterPage() {
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="you@example.com"
+                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="hr@company.com"
                     />
                   </div>
                 </div>
@@ -93,7 +93,7 @@ export default function JobSeekerRegisterPage() {
                       minLength={6}
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       placeholder="Minimum 6 characters"
                     />
                     <button
@@ -124,7 +124,7 @@ export default function JobSeekerRegisterPage() {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       placeholder="+1 (555) 000-0000"
                     />
                   </div>
@@ -140,7 +140,7 @@ export default function JobSeekerRegisterPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <>
@@ -148,7 +148,7 @@ export default function JobSeekerRegisterPage() {
                       <span>Creating Account...</span>
                     </>
                   ) : (
-                    <span>Create Account</span>
+                    <span>Create Company Account</span>
                   )}
                 </button>
               </form>
@@ -156,22 +156,10 @@ export default function JobSeekerRegisterPage() {
               <div className="mt-6 text-center">
                 <p className="text-gray-600 text-sm">
                   Already have an account?{' '}
-                  <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-medium">
+                  <Link href="/auth/login" className="text-purple-600 hover:text-purple-700 font-medium">
                     Log in
                   </Link>
                 </p>
-                <div className="mt-4 pt-4 border-t">
-                  <p className="text-gray-600 text-sm mb-2">Looking to hire or interview?</p>
-                  <div className="flex gap-3 justify-center">
-                    <Link href="/companies" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
-                      For Companies
-                    </Link>
-                    <span className="text-gray-400">•</span>
-                    <Link href="/interviewers" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
-                      For Interviewers
-                    </Link>
-                  </div>
-                </div>
               </div>
             </>
           ) : (
@@ -179,25 +167,14 @@ export default function JobSeekerRegisterPage() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-6">
                 <CheckCircle2 className="h-10 w-10 text-green-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Account Created!</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Company Account Created!</h2>
               <p className="text-gray-600 mb-4">
-                You've received 200 free credits to get started
+                You've received 10,000 free credits to start hiring
               </p>
               <p className="text-sm text-gray-500">Redirecting to login...</p>
             </div>
           )}
         </div>
-
-        <p className="text-center text-gray-600 text-sm mt-6">
-          By continuing, you agree to our{' '}
-          <Link href="/terms" className="text-blue-600 hover:text-blue-700">
-            Terms of Service
-          </Link>{' '}
-          and{' '}
-          <Link href="/privacy" className="text-blue-600 hover:text-blue-700">
-            Privacy Policy
-          </Link>
-        </p>
       </div>
     </div>
   );
