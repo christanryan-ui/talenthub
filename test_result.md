@@ -604,7 +604,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All Iteration 4 backend APIs tested and working"
+    - "ATS Ranking System backend APIs tested and working"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
