@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
+import JobSeekerLayout from '@/components/JobSeekerLayout';
 import { 
   Briefcase, Upload, Loader2, CheckCircle, Plus, X, Save, Trash2, 
   GraduationCap, Award, Palette, Type, Camera, Code
