@@ -1116,6 +1116,6 @@ export default function JobSeekerProfilePage() {
           </aside>
         )}
       </div>
-    </div>
+    </JobSeekerLayout>
   );
 }
