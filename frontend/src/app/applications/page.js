@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import JobSeekerLayout from '@/components/JobSeekerLayout';
 import api from '@/lib/api';
 import Link from 'next/link';
 import { 
