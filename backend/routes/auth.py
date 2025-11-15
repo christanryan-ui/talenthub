@@ -29,7 +29,7 @@ async def get_current_user(authorization: Optional[str] = Header(None)) -> Optio
         return None
     
     user_id = payload.get('user_id')
-    user_data = await db.users.find_one({'id': user_id})
+    user_data = await db.users.find_one({'id': user_id}, {'_id': 0})
     
     if not user_data:
         return None
