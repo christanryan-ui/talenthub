@@ -10,10 +10,6 @@ from typing import List
 import uuid
 from datetime import datetime, timezone
 
-# Import auth routes
-from routes import auth
-
-
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
@@ -21,6 +17,11 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+# Import auth routes after setting up database
+from routes import auth
+# Inject database connection into auth module
+auth.db = db
 
 # Create the main app without a prefix
 app = FastAPI(title="TalentHub API", version="1.0.0")
