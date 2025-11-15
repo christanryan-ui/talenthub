@@ -169,42 +169,8 @@ export default function JobsPage() {
   return (
     <JobSeekerLayout>
       <div className="p-8">
-            <div className="flex items-center gap-4">
-              {user ? (
-                <>
-                  <Link href="/dashboard" className="text-gray-600 hover:text-blue-600 transition-colors">
-                    Dashboard
-                  </Link>
-                  {user.role === 'employer' && (
-                    <Link 
-                      href="/post-job" 
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Post Job
-                    </Link>
-                  )}
-                </>
-              ) : (
-                <>
-                  <Link href="/auth/login" className="text-gray-600 hover:text-blue-600 transition-colors">
-                    Login
-                  </Link>
-                  <Link 
-                    href="/auth/register" 
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Search Bar */}
-      <div className="bg-gradient-to-r from-blue-600 to-cyan-600 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Page Header */}
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Find Your Dream Job</h1>
           <p className="text-blue-100 mb-6">Discover opportunities from top companies</p>
           
