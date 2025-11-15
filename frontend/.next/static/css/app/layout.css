@@ -658,6 +658,9 @@ video {
 .relative {
   position: relative;
 }
+.sticky {
+  position: sticky;
+}
 .inset-0 {
   inset: 0px;
 }
@@ -741,6 +744,9 @@ video {
 .top-3\.5 {
   top: 0.875rem;
 }
+.top-16 {
+  top: 4rem;
+}
 .z-10 {
   z-index: 10;
 }
@@ -752,6 +758,12 @@ video {
 }
 .z-\[1\] {
   z-index: 1;
+}
+.z-40 {
+  z-index: 40;
+}
+.col-span-2 {
+  grid-column: span 2 / span 2;
 }
 .-mx-1 {
   margin-left: -0.25rem;
@@ -927,6 +939,12 @@ video {
 .h-px {
   height: 1px;
 }
+.h-32 {
+  height: 8rem;
+}
+.h-\[calc\(100vh-4rem\)\] {
+  height: calc(100vh - 4rem);
+}
 .max-h-\[--radix-context-menu-content-available-height\] {
   max-height: var(--radix-context-menu-content-available-height);
 }
@@ -1016,6 +1034,12 @@ video {
 }
 .w-px {
   width: 1px;
+}
+.w-32 {
+  width: 8rem;
+}
+.w-80 {
+  width: 20rem;
 }
 .min-w-0 {
   min-width: 0px;
@@ -1273,6 +1297,11 @@ video {
   margin-top: calc(2rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(2rem * var(--tw-space-y-reverse));
 }
+.space-x-6 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(1.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(1.5rem * calc(1 - var(--tw-space-x-reverse)));
+}
 .overflow-auto {
   overflow: auto;
 }
@@ -1407,6 +1436,10 @@ video {
   --tw-border-opacity: 1;
   border-color: rgb(254 240 138 / var(--tw-border-opacity, 1));
 }
+.border-white {
+  --tw-border-opacity: 1;
+  border-color: rgb(255 255 255 / var(--tw-border-opacity, 1));
+}
 .border-l-transparent {
   border-left-color: transparent;
 }
@@ -1535,6 +1568,10 @@ video {
   --tw-bg-opacity: 1;
   background-color: rgb(250 245 255 / var(--tw-bg-opacity, 1));
 }
+.bg-gray-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1));
+}
 .bg-gradient-to-b {
   background-image: linear-gradient(to bottom, var(--tw-gradient-stops));
 }
@@ -1611,6 +1648,9 @@ video {
 }
 .fill-primary {
   fill: hsl(var(--primary));
+}
+.object-cover {
+  object-fit: cover;
 }
 .p-0 {
   padding: 0px;
@@ -1776,6 +1816,12 @@ video {
 }
 .align-middle {
   vertical-align: middle;
+}
+.font-sans {
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+.font-serif {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 }
 .text-2xl {
   font-size: 1.5rem;
@@ -2423,6 +2469,11 @@ html {
 .hover\:text-red-700:hover {
   --tw-text-opacity: 1;
   color: rgb(185 28 28 / var(--tw-text-opacity, 1));
+}
+
+.hover\:text-gray-600:hover {
+  --tw-text-opacity: 1;
+  color: rgb(75 85 99 / var(--tw-text-opacity, 1));
 }
 
 .hover\:underline:hover {
