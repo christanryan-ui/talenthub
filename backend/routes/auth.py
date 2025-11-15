@@ -80,10 +80,10 @@ async def register(user_data: UserCreate):
         credits_paid=0
     )
     
-    await db.users.insert_one(user.dict())
+    await db.users.insert_one(user.model_dump())
     
     # Log credit transaction for signup bonus
-    if bonus_config.get('signup_bonus', 0) > 0:
+    if signup_bonus > 0:
         from models import CreditTransaction, CreditType
         transaction = CreditTransaction(
             user_id=user.id,
