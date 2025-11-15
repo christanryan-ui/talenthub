@@ -325,6 +325,7 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
+        </div>
       </JobSeekerLayout>
     );
   }
