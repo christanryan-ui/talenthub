@@ -107,13 +107,6 @@ export default function MyApplicationsPage() {
   return (
     <JobSeekerLayout>
       <div className="p-8">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Page Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">My Applications</h1>
