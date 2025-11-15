@@ -105,24 +105,8 @@ export default function MyApplicationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-              TalentHub
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link href="/jobs" className="text-gray-600 hover:text-blue-600 transition-colors">
-                Browse Jobs
-              </Link>
-              <Link href="/dashboard" className="text-gray-600 hover:text-blue-600 transition-colors">
-                Dashboard
-              </Link>
-              <Link href="/profile" className="text-gray-600 hover:text-blue-600 transition-colors">
-                Profile
-              </Link>
+    <JobSeekerLayout>
+      <div className="p-8">
             </div>
           </div>
         </div>
