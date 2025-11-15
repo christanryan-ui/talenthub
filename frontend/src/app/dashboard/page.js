@@ -82,6 +82,13 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Profile Completion Widget for Job Seekers */}
+        {user?.role === 'jobseeker' && (
+          <div className="mb-8">
+            <ProfileCompletionWidget />
+          </div>
+        )}
+
         {/* Stats Cards */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-xl p-6 border border-gray-200">
