@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
+import JobSeekerLayout from '@/components/JobSeekerLayout';
 import Link from 'next/link';
 import { 
   Search, 
