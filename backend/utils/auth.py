@@ -12,9 +12,21 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+def hash_password(password: str) -> str:
+    """
+    Hash a password using bcrypt
+    """
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    Verify a password against its hash
+    """
+    return pwd_context.verify(plain_password, hashed_password)
+
 def generate_magic_token() -> str:
     """
-    Generate a secure random token for magic link
+    Generate a secure random token for password reset
     """
     return secrets.token_urlsafe(32)
 
