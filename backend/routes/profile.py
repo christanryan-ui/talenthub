@@ -392,3 +392,138 @@ async def create_company(company_data: CompanyCreate, current_user: User = Depen
     await db.companies.insert_one(company.model_dump())
     
     return {'message': 'Company created successfully', 'company': company}
+
+# ==================== Job Seeker Search (Employer Feature) ====================
+
+@router.get('/jobseeker/search')
+async def search_jobseekers(
+    query: Optional[str] = None,
+    location: Optional[str] = None,
+    experience_min: Optional[int] = None,
+    experience_max: Optional[int] = None,
+    skills: Optional[str] = None,
+    verified_only: Optional[bool] = False,
+    sort_by: str = 'relevance',
+    page: int = 1,
+    limit: int = 20,
+    current_user: User = Depends(get_current_user)
+):
+    """Search job seekers (employer only)"""
+    if not current_user or current_user.role != UserRole.EMPLOYER:
+        raise HTTPException(status_code=403, detail='Only employers can search talent')
+    
+    # Build search filters
+    filters = {}
+    
+    if query:
+        # Search in name, position, company
+        filters['$or'] = [
+            {'first_name': {'$regex': query, '$options': 'i'}},
+            {'last_name': {'$regex': query, '$options': 'i'}},
+            {'current_position': {'$regex': query, '$options': 'i'}},
+            {'current_company': {'$regex': query, '$options': 'i'}},
+        ]
+    
+    if location:
+        filters['location'] = {'$regex': location, '$options': 'i'}
+    
+    if experience_min is not None or experience_max is not None:
+        filters['experience_years'] = {}
+        if experience_min is not None:
+            filters['experience_years']['$gte'] = experience_min
+        if experience_max is not None:
+            filters['experience_years']['$lte'] = experience_max
+    
+    if skills:
+        skill_list = [s.strip() for s in skills.split(',')]
+        filters['primary_skills'] = {'$in': skill_list}
+    
+    if verified_only:
+        filters['verification_status'] = 'verified'
+    
+    # Sorting
+    sort_options = {
+        'relevance': [('overall_rating', -1), ('verification_count', -1)],
+        'experience': [('experience_years', -1)],
+        'recent': [('updated_at', -1)]
+    }
+    sort = sort_options.get(sort_by, sort_options['relevance'])
+    
+    # Pagination
+    skip = (page - 1) * limit
+    
+    # Execute query
+    profiles_cursor = db.jobseeker_profiles.find(filters, {'_id': 0}).sort(sort).skip(skip).limit(limit)
+    profiles = await profiles_cursor.to_list(limit)
+    
+    # Get user emails for each profile
+    for profile in profiles:
+        user = await db.users.find_one({'id': profile['user_id']}, {'_id': 0, 'email': 1})
+        if user:
+            profile['email'] = user['email']
+    
+    total = await db.jobseeker_profiles.count_documents(filters)
+    
+    return {
+        'profiles': profiles,
+        'total': total,
+        'page': page,
+        'limit': limit,
+        'pages': (total + limit - 1) // limit
+    }
+
+# ==================== Job Seeker Settings ====================
+
+@router.get('/jobseeker/settings')
+async def get_jobseeker_settings(current_user: User = Depends(get_current_user)):
+    """Get job seeker settings"""
+    if not current_user or current_user.role != UserRole.JOB_SEEKER:
+        raise HTTPException(status_code=403, detail='Only job seekers can access settings')
+    
+    profile_data = await db.jobseeker_profiles.find_one({'user_id': current_user.id}, {'_id': 0})
+    
+    if not profile_data:
+        raise HTTPException(status_code=404, detail='Profile not found')
+    
+    # Return only settings-related fields
+    settings = {
+        'expected_salary': profile_data.get('expected_salary'),
+        'current_salary': profile_data.get('current_salary'),
+        'notice_period': profile_data.get('notice_period'),
+        'preferred_locations': profile_data.get('preferred_locations', []),
+        'preferred_positions': profile_data.get('preferred_positions', []),
+        'job_search_status': profile_data.get('job_search_status', 'actively_looking'),
+        'willing_to_relocate': profile_data.get('willing_to_relocate', False),
+    }
+    
+    return settings
+
+@router.put('/jobseeker/settings')
+async def update_jobseeker_settings(
+    settings_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Update job seeker settings"""
+    if not current_user or current_user.role != UserRole.JOB_SEEKER:
+        raise HTTPException(status_code=403, detail='Only job seekers can update settings')
+    
+    existing_profile = await db.jobseeker_profiles.find_one({'user_id': current_user.id})
+    if not existing_profile:
+        raise HTTPException(status_code=404, detail='Profile not found')
+    
+    # Only update allowed settings fields
+    allowed_fields = [
+        'expected_salary', 'current_salary', 'notice_period',
+        'preferred_locations', 'preferred_positions',
+        'job_search_status', 'willing_to_relocate'
+    ]
+    
+    update_data = {k: v for k, v in settings_data.items() if k in allowed_fields and v is not None}
+    update_data['updated_at'] = datetime.utcnow()
+    
+    await db.jobseeker_profiles.update_one(
+        {'user_id': current_user.id},
+        {'$set': update_data}
+    )
+    
+    return {'message': 'Settings updated successfully'}
