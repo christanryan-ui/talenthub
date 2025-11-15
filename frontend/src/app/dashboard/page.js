@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
+import JobSeekerLayout from '@/components/JobSeekerLayout';
 import ProfileCompletionWidget from '@/components/ProfileCompletionWidget';
 import { Briefcase, Award, Coins, LogOut, User, Settings } from 'lucide-react';
 import Link from 'next/link';
