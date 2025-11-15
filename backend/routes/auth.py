@@ -54,6 +54,8 @@ async def register(user_data: UserCreate):
     
     # Get bonus config for the role
     bonus_config = await db.bonus_configs.find_one({'role': user_data.role})
+    signup_bonus = 0
+    
     if not bonus_config:
         # Create default bonus config
         default_bonuses = {
@@ -63,15 +65,18 @@ async def register(user_data: UserCreate):
             UserRole.ADMIN: {'signup_bonus': 0, 'referral_bonus': 0, 'daily_login_bonus': 0, 'session_time_bonus': 0, 'session_time_threshold': 3600},
         }
         bonus_data = default_bonuses.get(user_data.role, {'signup_bonus': 0})
-        bonus_config = BonusConfig(role=user_data.role, **bonus_data)
-        await db.bonus_configs.insert_one(bonus_config.dict())
+        signup_bonus = bonus_data['signup_bonus']
+        bonus_config_obj = BonusConfig(role=user_data.role, **bonus_data)
+        await db.bonus_configs.insert_one(bonus_config_obj.model_dump())
+    else:
+        signup_bonus = bonus_config.get('signup_bonus', 0)
     
     # Create user
     user = User(
         email=user_data.email,
         phone=user_data.phone,
         role=user_data.role,
-        credits_free=bonus_config.get('signup_bonus', 0),
+        credits_free=signup_bonus,
         credits_paid=0
     )
     
