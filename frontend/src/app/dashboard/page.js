@@ -45,34 +45,11 @@ export default function DashboardPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <Briefcase className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">TalentHub</span>
-          </Link>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 px-4 py-2 bg-blue-50 rounded-lg">
-              <Coins className="h-5 w-5 text-blue-600" />
-              <span className="font-medium text-gray-900">{user?.credits_free + user?.credits_paid || 0}</span>
-              <span className="text-sm text-gray-600">credits</span>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors"
-            >
-              <LogOut className="h-5 w-5" />
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+  // Use JobSeekerLayout for job seekers
+  if (user?.role === 'jobseeker') {
+    return (
+      <JobSeekerLayout>
+        <div className="p-8">
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl p-8 text-white mb-8">
           <h1 className="text-4xl font-bold mb-2">Welcome back!</h1>
