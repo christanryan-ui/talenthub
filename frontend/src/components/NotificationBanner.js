@@ -49,7 +49,7 @@ export default function NotificationBanner({ userRole = null, userId = null }) {
   if (visibleNotifications.length === 0) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 space-y-1">
+    <div className="fixed top-0 left-0 right-0 z-[9999] space-y-1 pointer-events-none">
       {visibleNotifications.map((notification) => (
         <div
           key={notification.id}
@@ -57,7 +57,7 @@ export default function NotificationBanner({ userRole = null, userId = null }) {
             backgroundColor: notification.bg_color || '#3b82f6',
             color: notification.text_color || '#ffffff'
           }}
-          className="px-4 py-3 shadow-md"
+          className="px-4 py-3 shadow-lg pointer-events-auto"
         >
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 flex-1">
@@ -65,13 +65,12 @@ export default function NotificationBanner({ userRole = null, userId = null }) {
                 <Bell className="h-5 w-5 flex-shrink-0" />
               )}
               <div className="flex-1">
-                <p className="font-semibold">{notification.title}</p>
-                <p className="text-sm opacity-90">{notification.message}</p>
+                <p className="text-sm font-medium">{notification.message}</p>
               </div>
             </div>
             <button
               onClick={() => handleDismiss(notification.id)}
-              className="p-1 hover:bg-black hover:bg-opacity-10 rounded transition-colors flex-shrink-0"
+              className="p-1 hover:bg-black hover:bg-opacity-20 rounded transition-colors flex-shrink-0"
               aria-label="Dismiss notification"
             >
               <X className="h-5 w-5" />
